@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="220" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="30" width="200" height="110" rx="16" fill="#e6f4ff"/>
+  <rect x="30" y="50" width="160" height="70" rx="10" fill="#fff" stroke="#1677ff" stroke-width="2"/>
+  <rect x="45" y="70" width="40" height="30" rx="6" fill="#91d5ff"/>
+  <rect x="115" y="70" width="60" height="12" rx="4" fill="#bae0ff"/>
+  <rect x="115" y="90" width="40" height="8" rx="4" fill="#bae0ff"/>
+  <circle cx="60" cy="120" r="6" fill="#1677ff"/>
+  <circle cx="80" cy="120" r="6" fill="#52c41a"/>
+  <circle cx="100" cy="120" r="6" fill="#faad14"/>
+  <rect x="0" y="0" width="220" height="20" rx="8" fill="#1677ff"/>
+  <text x="110" y="15" text-anchor="middle" fill="#fff" font-size="14" font-family="Arial" font-weight="bold">DASHBOARD</text>
+</svg>

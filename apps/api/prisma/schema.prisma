@@ -1,0 +1,101 @@
+model Funcionario {
+  id          Int                     @id @default(autoincrement())
+  name        String
+  createdAt   DateTime                @default(now())
+  lancamentos FuncionarioLancamento[]
+  veiculos    Veiculo[]
+}
+model Driver {
+  id    Int    @id @default(autoincrement())
+  name  String
+  createdAt DateTime @default(now())
+}
+model Veiculo {
+  id             Int                     @id @default(autoincrement())
+  funcionarioId  Int
+  funcionario    Funcionario             @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+  nome           String
+  placa          String?
+  eletrico       Boolean                 @default(true)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  lancamentos    FuncionarioLancamento[]
+
+  @@index([funcionarioId])
+}
+
+// Prisma schema for PostgreSQL
+// Configure your connection string in .env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Exemplo de tabela inicial
+model User {
+  id    Int    @id @default(autoincrement())
+  email String @unique
+  name  String?
+  password String
+  createdAt DateTime @default(now())
+  sessions Session[]
+}
+
+model Session {
+  id               String   @id @default(cuid())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String   @unique
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  replacedById     String?
+  replacedBy       Session? @relation("SessionRotation", fields: [replacedById], references: [id])
+  previous         Session[] @relation("SessionRotation")
+  lastUsedAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum LancamentoTipo {
+  GANHO
+  GASTO
+}
+
+enum LancamentoCategoria {
+  UBER
+  N99
+  BLABLACAR
+  TRANSFER
+  PARTICULAR
+  RECARGA
+  LIMPEZA
+  REVISAO
+  MANUTENCAO
+}
+
+model FuncionarioLancamento {
+  id             Int                 @id @default(autoincrement())
+  funcionarioId  Int
+  funcionario    Funcionario         @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+  veiculoId      Int?
+  veiculo        Veiculo?            @relation(fields: [veiculoId], references: [id], onDelete: SetNull)
+  tipo           LancamentoTipo
+  categoria      LancamentoCategoria
+  valor          Decimal             @db.Decimal(10, 2)
+  kmRodados      Decimal?            @db.Decimal(10, 2)
+  observacao     String?
+  dataReferencia DateTime
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([funcionarioId, dataReferencia])
+  @@index([veiculoId])
+}
