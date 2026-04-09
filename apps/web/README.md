@@ -178,20 +178,22 @@ Quando a API responde `401`, o frontend:
 
 | Variável | Obrigatória | Uso | Exemplo |
 | --- | --- | --- | --- |
+| `API_BASE_URL` | Sim para produção | Base da API usada pelo rewrite de `/api/*`; em local pode continuar apontando para `http://localhost:3000` | `https://transfer-web-api.vercel.app` |
 | `AUTH_SESSION_SECRET` | Recomendado | Usada pelo app web para validar localmente o token de acesso; deve ser igual ao valor da API | `uma-chave-longa-e-aleatoria` |
 | `NODE_ENV` | Não | Comportamento padrão do Next.js em desenvolvimento e produção | `development` |
 
 ### Exemplo de `.env.local`
 
 ```env
+API_BASE_URL="http://localhost:3000"
 AUTH_SESSION_SECRET="uma-chave-longa-e-aleatoria"
 ```
 
 ### Observação importante
 
-- o rewrite para `/api/:path*` aponta fixamente para `http://localhost:3000`
-- essa URL está definida em configuração do Next.js, não em variável de ambiente
-- se a API estiver em outra porta, ajuste `apps/web/next.config.js`
+- o rewrite para `/api/:path*` usa `API_BASE_URL`
+- sem `API_BASE_URL`, o fallback continua sendo `http://localhost:3000`
+- em produção, configure `API_BASE_URL` com a URL pública do projeto `apps/api` na Vercel
 
 ## Desenvolvimento Local
 
@@ -223,6 +225,6 @@ npm run check-types -w web
 
 ## Observações Operacionais
 
-- o frontend depende da API em `localhost:3000` para autenticação, funcionários e relatórios
+- o frontend depende da API configurada em `API_BASE_URL` para autenticação, funcionários e relatórios
 - se o app abrir mas as rotas `/api/*` falharem, normalmente o problema está no backend local
 - o fluxo mais estável no monorepo é subir `api` e `web` juntos pelo comando do root

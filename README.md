@@ -134,13 +134,65 @@ O monorepo não depende de um único arquivo global obrigatório, mas o fluxo pr
 | `root` | `AUTH_SESSION_SECRET` | Sim em produção | Segredo usado para assinar e validar tokens de sessão no backend e no frontend | `uma-chave-longa-e-aleatoria` |
 | `apps/api` | `DATABASE_URL` | Sim | Necessária para consultas Prisma, autenticação persistente e relatórios | `postgresql://postgres:postgres@localhost:5432/transfer_web` |
 | `apps/api` | `AUTH_SESSION_SECRET` | Sim em produção | Assinatura dos cookies e JWTs de acesso/renovação | `uma-chave-longa-e-aleatoria` |
+| `apps/web` | `API_BASE_URL` | Sim em produção | Base pública do projeto `apps/api`, usada pelo rewrite de `/api/*` do frontend | `https://transfer-web-api.vercel.app` |
 | `apps/web` | `AUTH_SESSION_SECRET` | Recomendado | Usada para validar o token de sessão no app web; deve ser igual à da API | `uma-chave-longa-e-aleatoria` |
 
 ### Sugestão prática
 
 - no desenvolvimento local, você pode manter `DATABASE_URL` e `AUTH_SESSION_SECRET` em `apps/api/.env`
+- em desenvolvimento local, `apps/web` pode usar `API_BASE_URL=http://localhost:3000`
 - se quiser que o app web valide a sessão com a mesma chave, replique `AUTH_SESSION_SECRET` em `apps/web/.env.local`
 - em produção, `AUTH_SESSION_SECRET` deve existir em ambos os apps com exatamente o mesmo valor
+
+## Deploy na Vercel
+
+Para produção estável, publique `apps/web` e `apps/api` como dois projetos separados na Vercel.
+
+### Projeto `web`
+
+- Root Directory: `apps/web`
+- Framework Preset: `Next.js`
+- Install Command: padrão da Vercel
+- Build Command: padrão da Vercel
+- Output Directory: padrão da Vercel
+
+Variáveis de ambiente:
+
+- `API_BASE_URL=https://SEU-PROJETO-API.vercel.app`
+- `AUTH_SESSION_SECRET=<mesmo valor usado no projeto api>`
+
+Domínio e comportamento:
+
+- o navegador acessa apenas o projeto `web`
+- chamadas para `/api/*` chegam no `web`
+- o rewrite do `web` encaminha essas chamadas para `API_BASE_URL`
+
+### Projeto `api`
+
+- Root Directory: `apps/api`
+- Framework Preset: `Next.js`
+- Install Command: padrão da Vercel
+- Build Command recomendado: `npm run vercel-build`
+- Output Directory: padrão da Vercel
+
+Variáveis de ambiente:
+
+- `DATABASE_URL=<string de conexão do banco de produção>`
+- `AUTH_SESSION_SECRET=<mesmo valor usado no projeto web>`
+
+Comandos disponíveis no `apps/api`:
+
+- `npm run build` gera o client Prisma e faz o build normal
+- `npm run build:production` gera o client Prisma, aplica migrations e faz o build
+- `npm run vercel-build` usa o fluxo de produção pensado para a Vercel
+
+### Checklist de produção
+
+- criar primeiro o projeto `api`
+- copiar a URL pública gerada pela Vercel
+- configurar essa URL em `API_BASE_URL` do projeto `web`
+- usar o mesmo `AUTH_SESSION_SECRET` nos dois projetos
+- validar login, sessão, cadastro de funcionário e geração de relatório após o deploy
 
 ## Fluxo Principal do Produto
 

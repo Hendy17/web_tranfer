@@ -96,7 +96,7 @@ apps/api/
 | --- | --- | --- | --- |
 | `DATABASE_URL` | Sim | String de conexão do Prisma para PostgreSQL | `postgresql://postgres:postgres@localhost:5432/transfer_web` |
 | `AUTH_SESSION_SECRET` | Sim em produção | Segredo usado para assinar e validar a sessão persistente | `uma-chave-longa-e-aleatoria` |
-| `NODE_ENV` | Não | Controla cookies `secure` e comportamento de runtime | `development` |
+| `NODE_ENV` | Não | Controla cookies `secure` e comportamento de runtime; a Vercel define automaticamente em produção | `development` |
 
 ### Exemplo de `.env`
 
@@ -207,8 +207,33 @@ npm run dev
 npm run build -w api
 ```
 
+### Build de produção com migrations
+
+```sh
+npm run build:production -w api
+```
+
 ## Observações Operacionais
 
-- o frontend principal em `apps/web` consome esta API via rewrite de `/api/*` para `localhost:3000`
+- o frontend principal em `apps/web` consome esta API via rewrite de `/api/*` para a `API_BASE_URL` configurada no frontend
 - reiniciar apenas a API costuma resolver falhas intermitentes de hot reload no desenvolvimento local
 - a consistência do domínio financeiro depende da validação de tipo, categoria, veículo e data no backend
+
+## Deploy na Vercel
+
+Configuração recomendada do projeto `apps/api`:
+
+- Root Directory: `apps/api`
+- Framework Preset: `Next.js`
+- Build Command: `npm run vercel-build`
+
+Variáveis de ambiente realmente necessárias para deploy:
+
+- `DATABASE_URL`
+- `AUTH_SESSION_SECRET`
+
+Observações:
+
+- `NODE_ENV` não precisa ser cadastrada manualmente na Vercel
+- `vercel-build` roda `prisma generate`, aplica `prisma migrate deploy` e só depois executa `next build`
+- o banco precisa estar acessível a partir da infraestrutura da Vercel durante o build e em runtime
