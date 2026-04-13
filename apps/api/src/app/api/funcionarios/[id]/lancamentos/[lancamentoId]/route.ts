@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { attachSessionCookies, requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { PrismaLancamentoCategoria } from "@/lib/prisma";
 
 type LancamentoTipo = "GANHO" | "GASTO";
 type LancamentoCategoria =
@@ -10,12 +11,13 @@ type LancamentoCategoria =
 	| "TRANSFER"
 	| "PARTICULAR"
 	| "RECARGA"
+	| "PEDAGIOS"
 	| "LIMPEZA"
 	| "REVISAO"
 	| "MANUTENCAO";
 
 const ganhoCategorias = new Set(["UBER", "N99", "BLABLACAR", "TRANSFER", "PARTICULAR"]);
-const gastoCategorias = new Set(["RECARGA", "LIMPEZA", "REVISAO", "MANUTENCAO"]);
+const gastoCategorias = new Set(["RECARGA", "PEDAGIOS", "LIMPEZA", "REVISAO", "MANUTENCAO"]);
 
 function isValidDate(value: string) {
 	return !Number.isNaN(Date.parse(value));
@@ -68,7 +70,7 @@ async function validateRequest(request: NextRequest, funcionarioId: number) {
 		data: {
 			veiculoId,
 			tipo: tipo as LancamentoTipo,
-			categoria: categoria as LancamentoCategoria,
+			categoria: categoria as PrismaLancamentoCategoria,
 			valor,
 			kmRodados,
 			observacao,

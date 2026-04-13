@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LancamentoCategoria } from "@prisma/client";
 import { attachSessionCookies, requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { LancamentoCategoria, prisma } from "@/lib/prisma";
 
 const validCategories = new Set<LancamentoCategoria>([
 	LancamentoCategoria.UBER,
@@ -10,6 +9,7 @@ const validCategories = new Set<LancamentoCategoria>([
 	LancamentoCategoria.TRANSFER,
 	LancamentoCategoria.PARTICULAR,
 	LancamentoCategoria.RECARGA,
+	LancamentoCategoria.PEDAGIOS,
 	LancamentoCategoria.LIMPEZA,
 	LancamentoCategoria.REVISAO,
 	LancamentoCategoria.MANUTENCAO,

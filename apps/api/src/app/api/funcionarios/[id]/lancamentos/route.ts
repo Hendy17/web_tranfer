@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { attachSessionCookies, requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { PrismaLancamentoCategoria } from "@/lib/prisma";
 
 const ganhoCategorias = new Set([
 	"UBER",
@@ -12,6 +13,7 @@ const ganhoCategorias = new Set([
 
 const gastoCategorias = new Set([
 	"RECARGA",
+	"PEDAGIOS",
 	"LIMPEZA",
 	"REVISAO",
 	"MANUTENCAO",
@@ -101,16 +103,7 @@ export async function POST(
 			funcionarioId,
 			veiculoId,
 			tipo,
-			categoria: categoria as
-				| "UBER"
-				| "N99"
-				| "BLABLACAR"
-				| "TRANSFER"
-				| "PARTICULAR"
-				| "RECARGA"
-				| "LIMPEZA"
-				| "REVISAO"
-				| "MANUTENCAO",
+			categoria: categoria as PrismaLancamentoCategoria,
 			valor,
 			kmRodados,
 			observacao,

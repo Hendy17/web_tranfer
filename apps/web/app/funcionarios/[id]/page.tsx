@@ -81,6 +81,7 @@ type Categoria =
 	| "TRANSFER"
 	| "PARTICULAR"
 	| "RECARGA"
+	| "PEDAGIOS"
 	| "LIMPEZA"
 	| "REVISAO"
 	| "MANUTENCAO";
@@ -155,6 +156,7 @@ const ganhoCategorias = [
 
 const gastoCategorias = [
 	{ value: "RECARGA", label: "Recarga" },
+	{ value: "PEDAGIOS", label: "Pedágios" },
 	{ value: "LIMPEZA", label: "Limpeza" },
 	{ value: "REVISAO", label: "Revisão" },
 	{ value: "MANUTENCAO", label: "Manutenção" },
@@ -172,6 +174,7 @@ const categoriaLabels: Record<Categoria, string> = {
 	TRANSFER: "Transfer",
 	PARTICULAR: "Corrida particular",
 	RECARGA: "Recarga",
+	PEDAGIOS: "Pedágios",
 	LIMPEZA: "Limpeza",
 	REVISAO: "Revisão",
 	MANUTENCAO: "Manutenção",
@@ -538,7 +541,7 @@ export default function FuncionarioDetalhePage() {
 							<Col xs={24} lg={9}>
 								<Card className={styles.sideCard}>
 									<Typography.Title level={4} className={styles.sectionTitle}>Frota elétrica</Typography.Title>
-									<Typography.Paragraph className={styles.sectionSubtitleBlock}>Cadastre os carros usados por este funcionário para separar ganhos, recargas, limpeza, revisão e manutenção por veículo.</Typography.Paragraph>
+									<Typography.Paragraph className={styles.sectionSubtitleBlock}>Cadastre os carros usados por este funcionário para separar ganhos, recargas, pedágios, limpeza, revisão e manutenção por veículo.</Typography.Paragraph>
 									{data.veiculos.length === 0 ? <Empty description="Nenhum carro cadastrado ainda." image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <div className={styles.vehicleList}>{data.veiculos.map((veiculo) => <div key={veiculo.id} className={styles.vehicleListItem}><div><strong>{veiculo.nome}</strong><span>{veiculo.placa || "Sem placa"}</span></div><Tag className={styles.energyTag}>Elétrico</Tag></div>)}</div>}
 									<Divider />
 									<Form form={veiculoForm} layout="vertical" onFinish={onCreateVeiculo}>
@@ -558,7 +561,7 @@ export default function FuncionarioDetalhePage() {
 										<Form.Item name="valor" label="Valor (R$)" rules={[{ required: true, message: "Informe o valor" }]}><InputNumber style={{ width: "100%" }} min={0.01} precision={2} step={10} placeholder="0,00" /></Form.Item>
 										<Form.Item name="kmRodados" label="KM rodados no período"><InputNumber style={{ width: "100%" }} min={0} precision={2} step={1} placeholder="0,00" /></Form.Item>
 										<Form.Item name="dataReferencia" label="Data de referência" rules={[{ required: true, message: "Informe a data" }]}><Input type="date" /></Form.Item>
-										<Form.Item name="observacao" label="Observação"><Input.TextArea rows={3} placeholder="Ex.: corrida aeroporto, recarga rápida, revisão de freio regenerativo..." /></Form.Item>
+										<Form.Item name="observacao" label="Observação"><Input.TextArea rows={3} placeholder="Ex.: corrida aeroporto, pedágio da rodovia, recarga rápida, revisão de freio regenerativo..." /></Form.Item>
 										<div className={styles.formActions}>
 											<Button type="primary" htmlType="submit" size="large" className={styles.primaryAction} loading={submitting} disabled={data.veiculos.length === 0}>{isEditing ? "Salvar edição" : "Salvar lançamento"}</Button>
 											{isEditing ? <Button onClick={() => resetLancamentoForm(data.veiculos[0]?.id)}>Cancelar edição</Button> : null}

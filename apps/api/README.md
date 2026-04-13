@@ -88,7 +88,7 @@ apps/api/
 ### Enums de domínio
 
 - `LancamentoTipo`: `GANHO`, `GASTO`
-- `LancamentoCategoria`: `UBER`, `N99`, `BLABLACAR`, `TRANSFER`, `PARTICULAR`, `RECARGA`, `LIMPEZA`, `REVISAO`, `MANUTENCAO`
+- `LancamentoCategoria`: `UBER`, `N99`, `BLABLACAR`, `TRANSFER`, `PARTICULAR`, `RECARGA`, `PEDAGIOS`, `LIMPEZA`, `REVISAO`, `MANUTENCAO`
 
 ## Variáveis de Ambiente
 

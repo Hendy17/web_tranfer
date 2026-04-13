@@ -1,0 +1,1 @@
+ALTER TYPE "LancamentoCategoria" ADD VALUE IF NOT EXISTS 'PEDAGIOS';

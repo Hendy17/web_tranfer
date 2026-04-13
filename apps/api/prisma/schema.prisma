@@ -76,6 +76,7 @@ enum LancamentoCategoria {
   TRANSFER
   PARTICULAR
   RECARGA
+  PEDAGIOS
   LIMPEZA
   REVISAO
   MANUTENCAO

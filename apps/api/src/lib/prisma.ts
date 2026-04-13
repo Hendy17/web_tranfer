@@ -1,5 +1,8 @@
 import { PrismaClient } from "../../node_modules/.prisma/client";
 
+export { LancamentoCategoria } from "../../node_modules/.prisma/client";
+export type { LancamentoCategoria as PrismaLancamentoCategoria } from "../../node_modules/.prisma/client";
+
 const globalForPrisma = globalThis as unknown as {
 	prisma?: PrismaClient;
 };
