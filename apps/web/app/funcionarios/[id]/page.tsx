@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import {
 	AuditOutlined,
@@ -233,6 +233,7 @@ export default function FuncionarioDetalhePage() {
 	const [form] = Form.useForm<LancamentoFormValues>();
 	const [veiculoForm] = Form.useForm<VeiculoFormValues>();
 	const tipoSelecionado = Form.useWatch("tipo", form) ?? "GANHO";
+	const ultimoTipoRef = useRef<LancamentoFormValues["tipo"] | null>(null);
 
 	const categoriaOptions = useMemo<CategoriaOption[]>(
 		() =>
@@ -282,6 +283,18 @@ export default function FuncionarioDetalhePage() {
 	useEffect(() => {
 		void loadFuncionario();
 	}, [loadFuncionario]);
+
+	useEffect(() => {
+		if (ultimoTipoRef.current && ultimoTipoRef.current !== tipoSelecionado) {
+			form.resetFields();
+			form.setFieldsValue({ tipo: tipoSelecionado });
+			setEditingLancamento(null);
+			setIsEditing(false);
+			message.warning("Campos limpos após mudança de tipo.");
+		}
+
+		ultimoTipoRef.current = tipoSelecionado;
+	}, [form, tipoSelecionado]);
 
 	function resetLancamentoForm(defaultVeiculoId?: number) {
 		form.resetFields();
