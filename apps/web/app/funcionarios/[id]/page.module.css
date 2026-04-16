@@ -322,9 +322,78 @@
 }
 
 .chartCard,
+.energyCard,
 .historyCard,
 .sideCard {
   margin-top: 16px;
+}
+
+.energyCard {
+  overflow: hidden;
+}
+
+.energyMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.energyMetric {
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #f7fbff, #eef7f4);
+  border: 1px solid rgba(20, 85, 192, 0.08);
+}
+
+.energyMetric span,
+.energyVehicleStats span {
+  display: block;
+  font-size: 0.78rem;
+  color: #72819a;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.energyMetric strong,
+.energyVehicleStats strong {
+  display: block;
+  color: #16253f;
+  font-size: 1.3rem;
+}
+
+.energyMetric small {
+  display: block;
+  margin-top: 8px;
+  color: #63728a;
+}
+
+.energyVehicleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.energyVehicleCard {
+  padding: 18px;
+  border-radius: 22px;
+  background: #f8fbff;
+  border: 1px solid rgba(24, 39, 75, 0.08);
+}
+
+.energyVehicleStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.energyVehicleStats div {
+  padding: 12px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(24, 39, 75, 0.06);
 }
 
 .tagRow {
@@ -338,7 +407,8 @@
 .vehicleTag,
 .energyTag,
 .categoryTag,
-.vehiclePill {
+.vehiclePill,
+.recurringTag {
   border-radius: 999px !important;
   padding: 5px 12px !important;
 }
@@ -358,6 +428,32 @@
 .chartWrap {
   width: 100%;
   height: 340px;
+  min-width: 0;
+  min-height: 340px;
+}
+
+.chartLoadingState {
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+}
+
+.percentInputCompact {
+  width: 100%;
+}
+
+.percentSuffix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 0 14px;
+  border: 1px solid #d9d9d9;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: #fafafa;
+  color: #4b5870;
+  font-weight: 600;
 }
 
 .vehicleGrid {
@@ -519,9 +615,62 @@
   border-color: rgba(20, 85, 192, 0.12) !important;
 }
 
+.recurringTag {
+  color: #7c5d16 !important;
+  background: #fff5d8 !important;
+  border-color: #f2d790 !important;
+}
+
 .historyDate,
 .historyKm {
   color: #6f7e96 !important;
+}
+
+.historyBattery {
+  display: block;
+  margin-top: 6px;
+  color: #4d6687 !important;
+}
+
+.historyRecurringLabel {
+  display: block;
+  margin-top: 6px;
+  color: #7c5d16 !important;
+  font-weight: 600;
+}
+
+.energyComparisonPanel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.recurringPanel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.energyComparisonItem {
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(24, 39, 75, 0.06);
+}
+
+.energyComparisonItem span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.74rem;
+  color: #6f7e96;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.energyComparisonItem strong {
+  color: #1d2d4a;
 }
 
 .historyNote {
@@ -562,6 +711,10 @@
 
 @media (max-width: 1100px) {
   .statsGrid,
+  .energyMetrics,
+  .energyComparisonPanel,
+  .recurringPanel,
+  .energyVehicleGrid,
   .vehicleGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -574,6 +727,10 @@
 
   .summaryStrip,
   .statsGrid,
+  .energyMetrics,
+  .energyComparisonPanel,
+  .recurringPanel,
+  .energyVehicleGrid,
   .vehicleGrid,
   .vehicleStats {
     grid-template-columns: 1fr;

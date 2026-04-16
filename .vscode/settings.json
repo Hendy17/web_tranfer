@@ -1,3 +1,7 @@
 {
-	"workbench.browser.enableChatTools": true
+	"workbench.browser.enableChatTools": true,
+	"cSpell.words": [
+		"PRESTACAO",
+		"SEGURO"
+	]
 }

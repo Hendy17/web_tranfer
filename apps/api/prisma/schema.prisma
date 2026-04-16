@@ -77,6 +77,8 @@ enum LancamentoCategoria {
   PARTICULAR
   RECARGA
   PEDAGIOS
+  PRESTACAO
+  SEGURO
   LIMPEZA
   REVISAO
   MANUTENCAO
@@ -92,6 +94,7 @@ model FuncionarioLancamento {
   categoria      LancamentoCategoria
   valor          Decimal             @db.Decimal(10, 2)
   kmRodados      Decimal?            @db.Decimal(10, 2)
+  bateriaConsumidaPercentual Decimal? @db.Decimal(5, 2)
   observacao     String?
   dataReferencia DateTime
   createdAt      DateTime            @default(now())

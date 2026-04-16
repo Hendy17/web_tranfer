@@ -1,50 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { DashboardEficienciaEnergetica, DashboardPeriodFilter } from "common-types";
 import { attachSessionCookies, requireAuth } from "@/lib/auth";
-import { LancamentoCategoria, prisma } from "@/lib/prisma";
+import { parseDashboardDateRange } from "@/lib/date-range";
+import { getDashboardEficienciaEnergetica } from "@/lib/energy-efficiency";
+import { prisma } from "@/lib/prisma";
+import type { PrismaLancamentoCategoria } from "@/lib/prisma";
 
-const validCategories = new Set<LancamentoCategoria>([
-	LancamentoCategoria.UBER,
-	LancamentoCategoria.N99,
-	LancamentoCategoria.BLABLACAR,
-	LancamentoCategoria.TRANSFER,
-	LancamentoCategoria.PARTICULAR,
-	LancamentoCategoria.RECARGA,
-	LancamentoCategoria.PEDAGIOS,
-	LancamentoCategoria.LIMPEZA,
-	LancamentoCategoria.REVISAO,
-	LancamentoCategoria.MANUTENCAO,
+const validCategories = new Set([
+	"UBER",
+	"N99",
+	"BLABLACAR",
+	"TRANSFER",
+	"PARTICULAR",
+	"RECARGA",
+	"PEDAGIOS",
+	"PRESTACAO",
+	"SEGURO",
+	"LIMPEZA",
+	"REVISAO",
+	"MANUTENCAO",
 ]);
 
 function toNumber(value: { toString(): string } | null | undefined) {
 	return value ? Number(value.toString()) : 0;
 }
 
-function getPeriodRange(period: string) {
-	const now = new Date();
-	const end = new Date(now);
-	const start = new Date(now);
-
-	if (period === "day") {
-		start.setHours(0, 0, 0, 0);
-		end.setHours(23, 59, 59, 999);
-		return { start, end };
+function readBateriaConsumidaPercentual(value: unknown) {
+	if (!value || typeof value !== "object" || !("bateriaConsumidaPercentual" in value)) {
+		return null;
 	}
 
-	if (period === "week") {
-		const day = now.getDay();
-		const diff = day === 0 ? -6 : 1 - day;
-		start.setDate(now.getDate() + diff);
-		start.setHours(0, 0, 0, 0);
-		end.setDate(start.getDate() + 6);
-		end.setHours(23, 59, 59, 999);
-		return { start, end };
-	}
-
-	start.setDate(1);
-	start.setHours(0, 0, 0, 0);
-	end.setMonth(now.getMonth() + 1, 0);
-	end.setHours(23, 59, 59, 999);
-	return { start, end };
+	const bateriaConsumidaPercentual = (value as { bateriaConsumidaPercentual: { toString(): string } | null }).bateriaConsumidaPercentual;
+	return bateriaConsumidaPercentual ? toNumber(bateriaConsumidaPercentual) : null;
 }
 
 function formatResumo(lancamentos: Array<{ tipo: "GANHO" | "GASTO"; valor: { toString(): string }; kmRodados: { toString(): string } | null }>) {
@@ -86,7 +73,15 @@ export async function GET(
 
 	const { id } = await context.params;
 	const funcionarioId = Number(id);
-	const period = request.nextUrl.searchParams.get("period") ?? "month";
+	let parsedRange;
+	try {
+		parsedRange = parseDashboardDateRange(request.nextUrl.searchParams);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "Período inválido.";
+		return NextResponse.json({ error: message }, { status: 400 });
+	}
+
+	const period = parsedRange.period;
 	const veiculoIdParam = request.nextUrl.searchParams.get("veiculoId");
 	const veiculoId = veiculoIdParam ? Number(veiculoIdParam) : null;
 	const categoriesParam = request.nextUrl.searchParams.get("categories") ?? "";
@@ -95,14 +90,10 @@ export async function GET(
 	const categories = categoriesParam
 		.split(",")
 		.map((item) => item.trim())
-		.filter(Boolean) as LancamentoCategoria[];
+		.filter(Boolean);
 
 	if (!Number.isInteger(funcionarioId) || funcionarioId <= 0) {
 		return NextResponse.json({ error: "Funcionário inválido." }, { status: 400 });
-	}
-
-	if (!["day", "week", "month"].includes(period)) {
-		return NextResponse.json({ error: "Período inválido." }, { status: 400 });
 	}
 
 	if (veiculoIdParam && (!Number.isInteger(veiculoId) || (veiculoId ?? 0) <= 0)) {
@@ -117,7 +108,9 @@ export async function GET(
 		return NextResponse.json({ error: "Categoria inválida no filtro." }, { status: 400 });
 	}
 
-	const { start, end } = getPeriodRange(period);
+	const categoriasFiltradas = categories as PrismaLancamentoCategoria[];
+
+	const { start, end } = parsedRange;
 
 	const funcionario = await prisma.funcionario.findUnique({
 		where: { id: funcionarioId },
@@ -132,7 +125,7 @@ export async function GET(
 						lte: end,
 					},
 					...(veiculoId ? { veiculoId } : {}),
-					...(categories.length > 0 ? { categoria: { in: categories } } : {}),
+					...(categoriasFiltradas.length > 0 ? { categoria: { in: categoriasFiltradas } } : {}),
 				},
 				include: {
 					veiculo: true,
@@ -145,6 +138,13 @@ export async function GET(
 	if (!funcionario) {
 		return NextResponse.json({ error: "Funcionário não encontrado." }, { status: 404 });
 	}
+
+	const eficienciaEnergetica: DashboardEficienciaEnergetica = await getDashboardEficienciaEnergetica({
+		funcionarioId,
+		periodoInicio: start,
+		periodoFim: end,
+		veiculoId,
+	});
 
 	const resumo = formatResumo(funcionario.lancamentos);
 	const totalItems = funcionario.lancamentos.length;
@@ -169,11 +169,11 @@ export async function GET(
 			createdAt: funcionario.createdAt.toISOString(),
 		},
 		filtros: {
-			period,
+			period: period as DashboardPeriodFilter,
 			periodStart: start.toISOString(),
 			periodEnd: end.toISOString(),
 			veiculoId,
-			categories,
+			categories: categoriasFiltradas,
 		},
 		pagination: {
 			page: currentPage,
@@ -188,6 +188,7 @@ export async function GET(
 			eletrico: veiculo.eletrico,
 			createdAt: veiculo.createdAt.toISOString(),
 		})),
+		eficienciaEnergetica,
 		resumo,
 		resumoPorVeiculo,
 		lancamentos: paginatedLancamentos.map((lancamento) => ({
@@ -196,6 +197,7 @@ export async function GET(
 			categoria: lancamento.categoria,
 			valor: toNumber(lancamento.valor),
 			kmRodados: lancamento.kmRodados ? toNumber(lancamento.kmRodados) : null,
+			bateriaConsumidaPercentual: readBateriaConsumidaPercentual(lancamento),
 			observacao: lancamento.observacao,
 			dataReferencia: lancamento.dataReferencia.toISOString(),
 			createdAt: lancamento.createdAt.toISOString(),
