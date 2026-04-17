@@ -192,7 +192,8 @@ AUTH_SESSION_SECRET="uma-chave-longa-e-aleatoria"
 ### Observação importante
 
 - o rewrite para `/api/:path*` usa `API_BASE_URL`
-- sem `API_BASE_URL`, o fallback continua sendo `http://localhost:3000`
+- sem `API_BASE_URL`, o fallback continua sendo `http://localhost:3000` apenas em desenvolvimento
+- em produção, o build do app `web` falha sem `API_BASE_URL` para evitar deploy com `/api/*` quebrado
 - em produção, configure `API_BASE_URL` com a URL pública do projeto `apps/api` na Vercel
 
 ## Desenvolvimento Local

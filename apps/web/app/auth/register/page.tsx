@@ -1,15 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, Typography, Card, Space, message } from "antd";
+import { Form, Input, Button, Typography, Card, Space, Spin, message } from "antd";
 import { UserOutlined, MailOutlined, LockOutlined } from "@ant-design/icons";
 
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [form] = Form.useForm();
   const router = useRouter();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function validateSession() {
+      try {
+        const response = await fetch("/api/auth/session", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          router.replace("/dashboard");
+          router.refresh();
+        }
+      } finally {
+        if (isMounted) {
+          setIsCheckingSession(false);
+        }
+      }
+    }
+
+    validateSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const onFinish = async (values: any) => {
     setLoading(true);
@@ -31,6 +60,14 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (isCheckingSession) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#f0f2f5" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f2f5" }}>

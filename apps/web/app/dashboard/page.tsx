@@ -5,7 +5,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import { Button, Card, Col, Empty, Input, Row, Select, Spin, Tag, Typography, message } from "antd";
 import { useRouter } from "next/navigation";
-import { fetchJson, UnauthorizedError } from "@/lib/http";
+import { fetchJson, HttpError, UnauthorizedError } from "@/lib/http";
 import { useAuthSession } from "@/lib/use-auth-session";
 import AuthenticatedHeader from "@/components/authenticated-header";
 
@@ -59,6 +59,18 @@ export default function DashboardPage() {
       }
     },
   });
+
+  const dashboardErrorMessage = useMemo(() => {
+    if (error instanceof HttpError) {
+      if (error.status === 404) {
+        return "A API do dashboard não foi encontrada. Configure API_BASE_URL no deploy do app web para apontar para o projeto apps/api.";
+      }
+
+      return error.message;
+    }
+
+    return "Não foi possível carregar o dashboard executivo.";
+  }, [error]);
 
   useEffect(() => {
     if (sessionExpired) {
@@ -153,7 +165,7 @@ export default function DashboardPage() {
         {isLoading ? (
           <div style={{ minHeight: 300, display: "grid", placeItems: "center" }}><Spin size="large" /></div>
         ) : error || !data ? (
-          <Card style={{ borderRadius: 24 }}><Empty description="Não foi possível carregar o dashboard executivo." /></Card>
+          <Card style={{ borderRadius: 24 }}><Empty description={dashboardErrorMessage} /></Card>
         ) : (
           <>
             <Row gutter={[16, 16]}>
