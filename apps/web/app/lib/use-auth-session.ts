@@ -13,11 +13,14 @@ export function useAuthSession() {
 		refreshInterval: 60_000,
 		revalidateOnFocus: true,
 	});
+	const session = result.data?.session ?? null;
+	const isLoadingSession = !result.data && !result.error;
 
 	return {
 		...result,
-		session: result.data?.session ?? null,
-		sessionLabel: formatSessionRemaining(result.data?.session.expiresAt ?? null),
+		session,
+		sessionLabel: isLoadingSession ? "Carregando sessao..." : formatSessionRemaining(session?.expiresAt ?? null),
+		isLoadingSession,
 		isUnauthorized: result.error instanceof UnauthorizedError,
 	};
 }

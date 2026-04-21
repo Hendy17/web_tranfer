@@ -12,19 +12,19 @@ interface AuthenticatedHeaderProps {
 
 export default function AuthenticatedHeader({ title, subtitle }: AuthenticatedHeaderProps) {
 	const router = useRouter();
-	const { session, sessionLabel } = useAuthSession();
-  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+	const { session, sessionLabel, isLoadingSession } = useAuthSession();
+	const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
-  async function handleLogout() {
-    setIsLoggingOut(true);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.replace("/auth/login");
-      router.refresh();
-    } finally {
-      setIsLoggingOut(false);
-    }
-  }
+	async function handleLogout() {
+		setIsLoggingOut(true);
+		try {
+			await fetch("/api/auth/logout", { method: "POST" });
+			router.replace("/auth/login");
+			router.refresh();
+		} finally {
+			setIsLoggingOut(false);
+		}
+	}
 
 	return (
 		<header
@@ -44,9 +44,7 @@ export default function AuthenticatedHeader({ title, subtitle }: AuthenticatedHe
 					{title}
 				</Typography.Title>
 				{subtitle ? <Typography.Text type="secondary">{subtitle}</Typography.Text> : null}
-				<Typography.Text type="secondary">
-					{session?.name || session?.email || "Usuário autenticado"}
-				</Typography.Text>
+				<Typography.Text type="secondary">{isLoadingSession ? "Carregando usuario..." : session?.name || session?.email || "Usuario autenticado"}</Typography.Text>
 				<Typography.Text type="secondary">{sessionLabel}</Typography.Text>
 			</div>
 			<Button danger onClick={handleLogout} loading={isLoggingOut}>
