@@ -2,7 +2,6 @@
 .vscode
 .turbo
 node_modules
-apps/api
 apps/docs
 apps/*/.next
 apps/*/.vercel
