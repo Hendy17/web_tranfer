@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { DashboardExecutivoEmpresa, DashboardPeriodFilter } from "common-types";
 import Image from "next/image";
 import useSWR from "swr";
-import { Button, Card, Col, Empty, Input, Row, Select, Spin, Tag, Typography, message } from "antd";
+import { Button, Card, Col, Empty, Row, Select, Spin, Tag, Typography, message } from "antd";
 import { useRouter } from "next/navigation";
 import { fetchJson, HttpError, UnauthorizedError } from "@/lib/http";
 import { useAuthSession } from "@/lib/use-auth-session";
@@ -12,10 +12,10 @@ import AuthenticatedHeader from "@/components/authenticated-header";
 const fetcher = <T,>(url: string) => fetchJson<T>(url);
 
 const periodLabels: Record<DashboardPeriodFilter, string> = {
-  day: "Hoje",
-  week: "Esta semana",
-  month: "Este mês",
-  custom: "Intervalo customizado",
+  previous_month: "Mês anterior",
+  quarterly: "Trimestral",
+  semiannual: "Semestral",
+  yearly: "Anual",
 };
 
 function formatCurrency(value: number) {
@@ -31,27 +31,17 @@ function formatCompactMonth(reference: string) {
   return `${month}/${year}`;
 }
 
-function buildExecutiveUrl(period: DashboardPeriodFilter, periodStart: string, periodEnd: string) {
+function buildExecutiveUrl(period: DashboardPeriodFilter) {
   const params = new URLSearchParams({ period });
-  if (period === "custom") {
-    params.set("periodStart", periodStart);
-    params.set("periodEnd", periodEnd);
-  }
-
   return `/api/dashboard/executivo?${params.toString()}`;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
   const [sessionExpired, setSessionExpired] = useState(false);
-  const [period, setPeriod] = useState<DashboardPeriodFilter>("month");
-  const [periodStart, setPeriodStart] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-  });
-  const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString().slice(0, 10));
+  const [period, setPeriod] = useState<DashboardPeriodFilter>("previous_month");
   const { isLoading: isSessionLoading } = useAuthSession();
-  const dashboardUrl = useMemo(() => buildExecutiveUrl(period, periodStart, periodEnd), [period, periodEnd, periodStart]);
+  const dashboardUrl = useMemo(() => buildExecutiveUrl(period), [period]);
   const { data, error, isLoading } = useSWR<DashboardExecutivoEmpresa>(dashboardUrl, fetcher, {
     onError: (error) => {
       if (error instanceof UnauthorizedError) {
@@ -77,15 +67,6 @@ export default function DashboardPage() {
       message.warning("Sua sessão expirou. Faça login novamente.");
     }
   }, [sessionExpired]);
-
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-
-    setPeriodStart(data.periodoInicio.slice(0, 10));
-    setPeriodEnd(data.periodoFim.slice(0, 10));
-  }, [data]);
 
   if (isSessionLoading) {
     return (
@@ -147,17 +128,10 @@ export default function DashboardPage() {
 
         <Card style={{ borderRadius: 24, marginBottom: 18, border: "1px solid rgba(24,39,75,0.08)", boxShadow: "0 18px 48px rgba(26,36,64,0.08)" }}>
           <Row gutter={[16, 16]} align="bottom">
-            <Col xs={24} md={8}>
+            <Col xs={24} md={24}>
               <label style={{ display: "block", marginBottom: 8, color: "#55647c", fontWeight: 600 }}>Período analisado</label>
               <Select<DashboardPeriodFilter> style={{ width: "100%" }} value={period} onChange={setPeriod} options={Object.entries(periodLabels).map(([value, label]) => ({ value: value as DashboardPeriodFilter, label }))} />
-            </Col>
-            <Col xs={24} md={8}>
-              <label style={{ display: "block", marginBottom: 8, color: "#55647c", fontWeight: 600 }}>Início do intervalo</label>
-              <Input type="date" value={periodStart} disabled={period !== "custom"} onChange={(event) => setPeriodStart(event.target.value)} />
-            </Col>
-            <Col xs={24} md={8}>
-              <label style={{ display: "block", marginBottom: 8, color: "#55647c", fontWeight: 600 }}>Fim do intervalo</label>
-              <Input type="date" value={periodEnd} disabled={period !== "custom"} onChange={(event) => setPeriodEnd(event.target.value)} />
+              <Typography.Text style={{ color: "#6f7e96" }}>Períodos fechados e automáticos (sem seleção manual de datas).</Typography.Text>
             </Col>
           </Row>
         </Card>

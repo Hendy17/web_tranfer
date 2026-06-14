@@ -205,10 +205,10 @@ const categoriaTipoMap: Record<Categoria, LancamentoFormValues["tipo"]> = {
 };
 
 const periodLabels: Record<DashboardPeriodFilter, string> = {
-	day: "Hoje",
-	week: "Esta semana",
-	month: "Este mês",
-	custom: "Intervalo customizado",
+	previous_month: "Mês anterior",
+	quarterly: "Trimestral",
+	semiannual: "Semestral",
+	yearly: "Anual",
 };
 
 function formatCurrency(value: number) {
@@ -234,16 +234,8 @@ function isCustoRecorrenteMensal(lancamento: Pick<FuncionarioLancamento, "tipo" 
 	);
 }
 
-function formatInputDate(value: string) {
-	return value.slice(0, 10);
-}
-
-function formatPeriodLabel(period: DashboardPeriodFilter, start: string, end: string) {
-	if (period !== "custom") {
-		return periodLabels[period];
-	}
-
-	return `${new Date(start).toLocaleDateString("pt-BR")} até ${new Date(end).toLocaleDateString("pt-BR")}`;
+function formatPeriodLabel(period: DashboardPeriodFilter) {
+	return periodLabels[period];
 }
 
 function getErrorMessage(error: unknown) {
@@ -253,8 +245,6 @@ function getErrorMessage(error: unknown) {
 function buildDetailUrl(
 	funcionarioId: string,
 	period: DashboardPeriodFilter,
-	periodStart: string,
-	periodEnd: string,
 	veiculoId: number | null,
 	categories: Categoria[],
 	page: number,
@@ -265,10 +255,6 @@ function buildDetailUrl(
 		page: String(page),
 		pageSize: String(pageSize),
 	});
-	if (period === "custom") {
-		params.set("periodStart", periodStart);
-		params.set("periodEnd", periodEnd);
-	}
 	if (veiculoId) {
 		params.set("veiculoId", String(veiculoId));
 	}
@@ -289,12 +275,7 @@ export default function FuncionarioDetalhePage() {
 	const [editingLancamento, setEditingLancamento] = useState<FuncionarioLancamento | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [data, setData] = useState<FuncionarioDetalheResponse | null>(null);
-	const [period, setPeriod] = useState<DashboardPeriodFilter>("month");
-	const [customPeriodStart, setCustomPeriodStart] = useState(() => {
-		const today = new Date();
-		return new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
-	});
-	const [customPeriodEnd, setCustomPeriodEnd] = useState(() => new Date().toISOString().slice(0, 10));
+	const [period, setPeriod] = useState<DashboardPeriodFilter>("previous_month");
 	const [selectedVeiculoId, setSelectedVeiculoId] = useState<number | null>(null);
 	const [selectedCategories, setSelectedCategories] = useState<Categoria[]>([]);
 	const [page, setPage] = useState(1);
@@ -325,7 +306,7 @@ export default function FuncionarioDetalhePage() {
 		[data],
 	);
 
-	const activeFilterCount = (selectedVeiculoId ? 1 : 0) + selectedCategories.length + 1 + (period === "custom" ? 2 : 0);
+	const activeFilterCount = (selectedVeiculoId ? 1 : 0) + selectedCategories.length + 1;
 
 	const loadFuncionario = useCallback(async () => {
 		if (!funcionarioId) {
@@ -335,7 +316,7 @@ export default function FuncionarioDetalhePage() {
 		setLoading(true);
 		try {
 			const response = await fetchJson<FuncionarioDetalheResponse>(
-				buildDetailUrl(funcionarioId, period, customPeriodStart, customPeriodEnd, selectedVeiculoId, selectedCategories, page, pageSize),
+				buildDetailUrl(funcionarioId, period, selectedVeiculoId, selectedCategories, page, pageSize),
 			);
 			setData(response);
 			const firstVeiculo = response.veiculos[0];
@@ -348,18 +329,19 @@ export default function FuncionarioDetalhePage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [customPeriodEnd, customPeriodStart, form, funcionarioId, page, pageSize, period, selectedCategories, selectedVeiculoId]);
+	}, [form, funcionarioId, page, pageSize, period, selectedCategories, selectedVeiculoId]);
 
 	useEffect(() => {
 		void loadFuncionario();
 	}, [loadFuncionario]);
 
 	useEffect(() => {
-		if (!chartWrapRef.current) {
+		const element = chartWrapRef.current;
+		if (!element || loading || chartData.length === 0) {
+			setChartWidth(0);
 			return;
 		}
 
-		const element = chartWrapRef.current;
 		const updateChartWidth = (nextWidth: number) => {
 			setChartWidth(nextWidth > 0 ? Math.max(Math.floor(nextWidth), 320) : 0);
 		};
@@ -382,16 +364,7 @@ export default function FuncionarioDetalhePage() {
 			window.cancelAnimationFrame(frame);
 			observer.disconnect();
 		};
-	}, []);
-
-	useEffect(() => {
-		if (!data) {
-			return;
-		}
-
-		setCustomPeriodStart(formatInputDate(data.filtros.periodStart));
-		setCustomPeriodEnd(formatInputDate(data.filtros.periodEnd));
-	}, [data]);
+	}, [chartData.length, loading]);
 
 	useEffect(() => {
 		if (ultimoTipoRef.current && ultimoTipoRef.current !== tipoSelecionado) {
@@ -531,16 +504,6 @@ export default function FuncionarioDetalhePage() {
 		setPage(1);
 	}
 
-	function handleChangeCustomPeriodStart(value: string) {
-		setCustomPeriodStart(value);
-		setPage(1);
-	}
-
-	function handleChangeCustomPeriodEnd(value: string) {
-		setCustomPeriodEnd(value);
-		setPage(1);
-	}
-
 	function handleChangeVeiculo(value: VeiculoFilterValue) {
 		setSelectedVeiculoId(value === "all" ? null : value);
 		setPage(1);
@@ -593,7 +556,7 @@ export default function FuncionarioDetalhePage() {
 									</div>
 								</div>
 									<div className={styles.summaryStrip}>
-										<div className={styles.summaryItem}><span>Período</span><strong>{formatPeriodLabel(period, data.filtros.periodStart, data.filtros.periodEnd)}</strong></div>
+										<div className={styles.summaryItem}><span>Período</span><strong>{formatPeriodLabel(period)}</strong></div>
 									<div className={styles.summaryItem}><span>Saldo líquido</span><strong>{formatCurrency(data.resumo.saldo)}</strong></div>
 									<div className={styles.summaryItem}><span>Ganho por KM</span><strong>{formatCurrency(data.resumo.ganhoPorKm)}</strong></div>
 								</div>
@@ -603,7 +566,7 @@ export default function FuncionarioDetalhePage() {
 								<div className={styles.sectionHeading}>
 									<div>
 										<Typography.Title level={4} className={styles.sectionTitle}>Filtro operacional</Typography.Title>
-										<Typography.Text className={styles.sectionSubtitle}>Combine período, carro e categoria para alinhar gráfico, cards e histórico.</Typography.Text>
+										<Typography.Text className={styles.sectionSubtitle}>Combine período fechado, carro e categoria para alinhar gráfico, cards e histórico (sem datas manuais).</Typography.Text>
 									</div>
 									<div className={styles.exportGroup}>
 										<Input className={styles.monthInput} type="month" value={reportMonth} onChange={(event) => setReportMonth(event.target.value)} />
@@ -613,8 +576,6 @@ export default function FuncionarioDetalhePage() {
 								</div>
 								<Row gutter={[16, 16]}>
 											<Col xs={24} md={8}><div className={styles.filterField}><label className={styles.filterLabel}>Período analisado</label><Select<DashboardPeriodFilter> className={styles.selectField} value={period} onChange={handleChangePeriod} options={Object.entries(periodLabels).map(([value, label]) => ({ value: value as DashboardPeriodFilter, label }))} /></div></Col>
-											<Col xs={24} md={8}><div className={styles.filterField}><label className={styles.filterLabel}>Início do intervalo</label><Input className={styles.monthInput} type="date" value={customPeriodStart} disabled={period !== "custom"} onChange={(event) => handleChangeCustomPeriodStart(event.target.value)} /></div></Col>
-											<Col xs={24} md={8}><div className={styles.filterField}><label className={styles.filterLabel}>Fim do intervalo</label><Input className={styles.monthInput} type="date" value={customPeriodEnd} disabled={period !== "custom"} onChange={(event) => handleChangeCustomPeriodEnd(event.target.value)} /></div></Col>
 											<Col xs={24} md={12}><div className={styles.filterField}><label className={styles.filterLabel}>Filtrar por carro</label><Select<VeiculoFilterValue> className={styles.selectField} value={selectedVeiculoId ?? "all"} onChange={handleChangeVeiculo} options={[{ value: "all", label: "Todos os carros" }, ...data.veiculos.map((veiculo) => ({ value: veiculo.id, label: veiculo.placa ? `${veiculo.nome} • ${veiculo.placa}` : veiculo.nome }))]} /></div></Col>
 											<Col xs={24} md={12}><div className={styles.filterField}><label className={styles.filterLabel}>Categorias</label><Select<Categoria[]> mode="multiple" allowClear className={styles.selectField} value={selectedCategories} onChange={handleChangeCategories} placeholder="Todas as categorias" options={allCategoriaOptions} /></div></Col>
 								</Row>
@@ -632,7 +593,7 @@ export default function FuncionarioDetalhePage() {
 							<div className={styles.sectionHeading}>
 								<div>
 									<Typography.Title level={4} className={styles.sectionTitle}>Eficiência energética</Typography.Title>
-									<Typography.Text className={styles.sectionSubtitle}>Comparativo entre o custo real das recargas do EV e o cenário hipotético de um veículo a combustão no mesmo período.</Typography.Text>
+									<Typography.Text className={styles.sectionSubtitle}>Comparativo entre o custo real das recargas do EV e o cenário hipotético de combustão no recorte fechado selecionado.</Typography.Text>
 								</div>
 								<div className={styles.tagRow}>
 									<Tag className={styles.softTag}>Base combustão: {data.eficienciaEnergetica.parametrosCombustao.kmPorLitro} km/L</Tag>
@@ -666,7 +627,7 @@ export default function FuncionarioDetalhePage() {
 							<div className={styles.sectionHeading}>
 								<div>
 									<Typography.Title level={4} className={styles.sectionTitle}>Gráfico por carro</Typography.Title>
-									<Typography.Text className={styles.sectionSubtitle}>Lucro, gastos e km rodado comparados entre os veículos do funcionário.</Typography.Text>
+									<Typography.Text className={styles.sectionSubtitle}>Lucro, gastos e km rodado comparados entre os veículos no período fechado selecionado.</Typography.Text>
 								</div>
 								<div className={styles.tagRow}>
 									<Tag className={styles.softTag}>{periodLabels[period]}</Tag>
@@ -855,7 +816,7 @@ export default function FuncionarioDetalhePage() {
 									<div className={styles.sectionHeading}>
 										<div>
 											<Typography.Title level={4} className={styles.sectionTitle}>Histórico financeiro</Typography.Title>
-											<Typography.Text className={styles.sectionSubtitle}>{formatPeriodLabel(period, data.filtros.periodStart, data.filtros.periodEnd)} • {selectedVeiculoId ? "Filtrado por carro" : "Todos os carros"}</Typography.Text>
+											<Typography.Text className={styles.sectionSubtitle}>{formatPeriodLabel(period)} • {selectedVeiculoId ? "Filtrado por carro" : "Todos os carros"}</Typography.Text>
 										</div>
 										<div className={styles.tagRow}>
 											<Tag className={styles.softTag}>Ganho/KM: {formatCurrency(data.resumo.ganhoPorKm)}</Tag>

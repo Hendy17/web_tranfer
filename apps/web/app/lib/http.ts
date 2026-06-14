@@ -18,6 +18,7 @@ export class UnauthorizedError extends HttpError {
 }
 
 let refreshInFlight: Promise<void> | null = null;
+const REQUEST_TIMEOUT_MS = 15_000;
 
 function redirectToLogin() {
 	if (typeof window === "undefined") {
@@ -39,8 +40,58 @@ async function refreshSession() {
 	}
 }
 
+function createRequestSignal(externalSignal?: AbortSignal) {
+	const controller = new AbortController();
+	let timedOut = false;
+
+	const timeoutId = globalThis.setTimeout(() => {
+		timedOut = true;
+		controller.abort();
+	}, REQUEST_TIMEOUT_MS);
+
+	const onExternalAbort = () => {
+		controller.abort();
+	};
+
+	if (externalSignal) {
+		if (externalSignal.aborted) {
+			onExternalAbort();
+		} else {
+			externalSignal.addEventListener("abort", onExternalAbort, { once: true });
+		}
+	}
+
+	const cleanup = () => {
+		globalThis.clearTimeout(timeoutId);
+		if (externalSignal) {
+			externalSignal.removeEventListener("abort", onExternalAbort);
+		}
+	};
+
+	return { signal: controller.signal, cleanup, didTimeout: () => timedOut };
+}
+
 export async function fetchJson<T>(input: RequestInfo | URL, init?: RequestInit, allowRetry = true): Promise<T> {
-	const response = await fetch(input, init);
+	const { signal, cleanup, didTimeout } = createRequestSignal(init?.signal);
+	let response: Response;
+
+	try {
+		response = await fetch(input, { ...init, signal });
+	} catch (error) {
+		cleanup();
+
+		if (didTimeout()) {
+			throw new HttpError("Tempo limite de requisição excedido. Verifique a API e tente novamente.", 408, null);
+		}
+
+		if (error instanceof DOMException && error.name === "AbortError") {
+			throw new HttpError("Requisição cancelada.", 499, null);
+		}
+
+		throw new HttpError("Não foi possível conectar com a API.", 0, null);
+	}
+
+	cleanup();
 	const payload = await response.json().catch(() => null);
 
 	if (!response.ok) {

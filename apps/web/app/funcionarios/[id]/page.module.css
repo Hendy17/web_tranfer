@@ -359,7 +359,10 @@
 .energyVehicleStats strong {
   display: block;
   color: #16253f;
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 1.7vw, 1.3rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .energyMetric small {
@@ -394,6 +397,7 @@
   border-radius: 16px;
   background: #ffffff;
   border: 1px solid rgba(24, 39, 75, 0.06);
+  min-width: 0;
 }
 
 .tagRow {

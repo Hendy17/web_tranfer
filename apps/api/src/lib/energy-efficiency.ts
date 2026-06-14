@@ -3,6 +3,7 @@ import type {
 	DashboardExecutivoEmpresa,
 	DashboardExecutivoResumoMensal,
 	DashboardEficienciaEnergetica,
+	DashboardPeriodFilter,
 	EficienciaEnergeticaPorFuncionario,
 	EficienciaEnergeticaPorVeiculo,
 	ResumoEficienciaEnergetica,
@@ -276,7 +277,7 @@ export async function getDashboardEficienciaEnergetica(params: {
 
 export async function getDashboardExecutivoEmpresa(params: {
 	empresa: string;
-	period: "day" | "week" | "month" | "custom";
+	period: DashboardPeriodFilter;
 	periodoInicio: Date;
 	periodoFim: Date;
 }): Promise<DashboardExecutivoEmpresa> {
