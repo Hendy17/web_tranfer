@@ -40,7 +40,7 @@ async function refreshSession() {
 	}
 }
 
-function createRequestSignal(externalSignal?: AbortSignal) {
+function createRequestSignal(externalSignal?: AbortSignal | null) {
 	const controller = new AbortController();
 	let timedOut = false;
 
