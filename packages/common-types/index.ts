@@ -8,7 +8,7 @@ export interface User {
   createdAt: string;
 }
 
-export type DashboardPeriodFilter = "previous_month" | "quarterly" | "semiannual" | "yearly";
+export type DashboardPeriodFilter = "current_month" | "previous_month" | "quarterly" | "semiannual" | "yearly";
 
 export interface ParametrosCombustaoHipotetica {
   kmPorLitro: number;

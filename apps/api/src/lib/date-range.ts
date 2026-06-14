@@ -19,8 +19,8 @@ function endOfDay(date: Date) {
 }
 
 export function parseDashboardDateRange(searchParams: URLSearchParams): ParsedDateRange {
-	const period = (searchParams.get("period") ?? "previous_month") as DashboardPeriodFilter;
-	const validPeriods: DashboardPeriodFilter[] = ["previous_month", "quarterly", "semiannual", "yearly"];
+	const period = (searchParams.get("period") ?? "current_month") as DashboardPeriodFilter;
+	const validPeriods: DashboardPeriodFilter[] = ["current_month", "previous_month", "quarterly", "semiannual", "yearly"];
 
 	if (!validPeriods.includes(period)) {
 		throw new Error("Período inválido.");
@@ -28,6 +28,14 @@ export function parseDashboardDateRange(searchParams: URLSearchParams): ParsedDa
 
 	const now = new Date();
 	const end = endOfDay(new Date(now.getFullYear(), now.getMonth(), 0));
+
+	if (period === "current_month") {
+		return {
+			period,
+			start: startOfDay(new Date(now.getFullYear(), now.getMonth(), 1)),
+			end: endOfDay(now),
+		};
+	}
 
 	if (period === "previous_month") {
 		return {

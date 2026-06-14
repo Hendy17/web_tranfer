@@ -205,6 +205,7 @@ const categoriaTipoMap: Record<Categoria, LancamentoFormValues["tipo"]> = {
 };
 
 const periodLabels: Record<DashboardPeriodFilter, string> = {
+	current_month: "Mês atual",
 	previous_month: "Mês anterior",
 	quarterly: "Trimestral",
 	semiannual: "Semestral",
@@ -275,7 +276,7 @@ export default function FuncionarioDetalhePage() {
 	const [editingLancamento, setEditingLancamento] = useState<FuncionarioLancamento | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [data, setData] = useState<FuncionarioDetalheResponse | null>(null);
-	const [period, setPeriod] = useState<DashboardPeriodFilter>("previous_month");
+	const [period, setPeriod] = useState<DashboardPeriodFilter>("current_month");
 	const [selectedVeiculoId, setSelectedVeiculoId] = useState<number | null>(null);
 	const [selectedCategories, setSelectedCategories] = useState<Categoria[]>([]);
 	const [page, setPage] = useState(1);

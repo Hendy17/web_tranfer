@@ -12,6 +12,7 @@ import AuthenticatedHeader from "@/components/authenticated-header";
 const fetcher = <T,>(url: string) => fetchJson<T>(url);
 
 const periodLabels: Record<DashboardPeriodFilter, string> = {
+  current_month: "Mês atual",
   previous_month: "Mês anterior",
   quarterly: "Trimestral",
   semiannual: "Semestral",
@@ -39,7 +40,7 @@ function buildExecutiveUrl(period: DashboardPeriodFilter) {
 export default function DashboardPage() {
   const router = useRouter();
   const [sessionExpired, setSessionExpired] = useState(false);
-  const [period, setPeriod] = useState<DashboardPeriodFilter>("previous_month");
+  const [period, setPeriod] = useState<DashboardPeriodFilter>("current_month");
   const { isLoading: isSessionLoading } = useAuthSession();
   const dashboardUrl = useMemo(() => buildExecutiveUrl(period), [period]);
   const { data, error, isLoading } = useSWR<DashboardExecutivoEmpresa>(dashboardUrl, fetcher, {
