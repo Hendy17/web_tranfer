@@ -359,10 +359,10 @@
 .energyVehicleStats strong {
   display: block;
   color: #16253f;
-  font-size: clamp(1.1rem, 1.7vw, 1.3rem);
+  font-size: clamp(1rem, 1.2vw, 1.22rem);
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  white-space: nowrap;
 }
 
 .energyMetric small {
@@ -373,13 +373,13 @@
 
 .energyVehicleGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 14px;
   margin-top: 18px;
 }
 
 .energyVehicleCard {
-  padding: 18px;
+  padding: 22px;
   border-radius: 22px;
   background: #f8fbff;
   border: 1px solid rgba(24, 39, 75, 0.08);
@@ -388,16 +388,58 @@
 .energyVehicleStats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
   margin-top: 14px;
 }
 
-.energyVehicleStats div {
-  padding: 12px;
+.energyStatBox {
+  padding: 14px;
+  min-height: 92px;
   border-radius: 16px;
   background: #ffffff;
   border: 1px solid rgba(24, 39, 75, 0.06);
   min-width: 0;
+}
+
+.energyStatCpk {
+  background: linear-gradient(180deg, #f2f7ff, #e8f1ff);
+  border-color: #cdddfd;
+}
+
+.energyStatEconomia {
+  background: linear-gradient(180deg, #effbf6, #e5f7ef);
+  border-color: #c6ebda;
+}
+
+.energyStatGratis {
+  background: linear-gradient(180deg, #f7f4ff, #efeaff);
+  border-color: #ddd0ff;
+}
+
+.energyStatRecarga {
+  background: linear-gradient(180deg, #fff9ef, #fff3de);
+  border-color: #f4dbab;
+}
+
+.energyStatManutencao {
+  background: linear-gradient(180deg, #fff3f0, #ffe8e2);
+  border-color: #f6c8bc;
+}
+
+.energyStatLavagem {
+  background: linear-gradient(180deg, #eef9ff, #e2f3ff);
+  border-color: #c6e5fa;
+}
+
+.energyStatEconomia strong,
+.energyStatGratis strong {
+  color: #144c8f;
+}
+
+.energyStatRecarga strong,
+.energyStatManutencao strong,
+.energyStatLavagem strong {
+  color: #263246;
 }
 
 .tagRow {

@@ -32,6 +32,9 @@ export interface EficienciaEnergeticaPorVeiculo extends ResumoEficienciaEnergeti
   veiculoId: number;
   nome: string;
   placa: string | null;
+  totalGastoRecarga: number;
+  totalGastoManutencao: number;
+  totalGastoLavagem: number;
 }
 
 export interface DashboardEficienciaEnergetica {
