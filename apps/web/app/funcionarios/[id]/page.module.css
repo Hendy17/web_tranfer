@@ -431,6 +431,11 @@
   border-color: #c6e5fa;
 }
 
+.energyStatPedagios {
+  background: linear-gradient(180deg, #fff5eb, #fff0e0);
+  border-color: #f0d9c5;
+}
+
 .energyStatEconomia strong,
 .energyStatGratis strong {
   color: #144c8f;
@@ -438,7 +443,8 @@
 
 .energyStatRecarga strong,
 .energyStatManutencao strong,
-.energyStatLavagem strong {
+.energyStatLavagem strong,
+.energyStatPedagios strong {
   color: #263246;
 }
 

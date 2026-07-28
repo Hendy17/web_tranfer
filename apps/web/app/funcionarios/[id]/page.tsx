@@ -615,13 +615,13 @@ export default function FuncionarioDetalhePage() {
 											<Typography.Text className={styles.vehicleSubtitle}>{item.placa || "Sem placa informada"}</Typography.Text>
 										</div>
 										<div className={styles.energyVehicleStats}>
-											<div><span>CPK EV</span><strong>{formatCurrency(item.cpkReal)}</strong></div>
 											<div className={`${styles.energyStatBox} ${styles.energyStatCpk}`}><span>CPK EV</span><strong>{formatCurrency(item.cpkReal)}</strong></div>
 											<div className={`${styles.energyStatBox} ${styles.energyStatEconomia}`}><span>Economia</span><strong>{formatCurrency(item.economiaTotal)}</strong></div>
 											<div className={`${styles.energyStatBox} ${styles.energyStatGratis}`}><span>Gratuitas</span><strong>{formatPercentage(item.percentualRecargasGratuitas)}</strong></div>
 											<div className={`${styles.energyStatBox} ${styles.energyStatRecarga}`}><span>Gasto recarga</span><strong>{formatCurrency(item.totalGastoRecarga)}</strong></div>
 											<div className={`${styles.energyStatBox} ${styles.energyStatManutencao}`}><span>Gasto manutenção</span><strong>{formatCurrency(item.totalGastoManutencao)}</strong></div>
 											<div className={`${styles.energyStatBox} ${styles.energyStatLavagem}`}><span>Gasto lavagem</span><strong>{formatCurrency(item.totalGastoLavagem)}</strong></div>
+											<div className={`${styles.energyStatBox} ${styles.energyStatPedagios}`}><span>Gasto pedágios</span><strong>{formatCurrency(item.totalGastoPedagios)}</strong></div>
 										</div>
 									</div>
 								))}

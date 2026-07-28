@@ -35,6 +35,7 @@ export interface EficienciaEnergeticaPorVeiculo extends ResumoEficienciaEnergeti
   totalGastoRecarga: number;
   totalGastoManutencao: number;
   totalGastoLavagem: number;
+  totalGastoPedagios: number;
 }
 
 export interface DashboardEficienciaEnergetica {

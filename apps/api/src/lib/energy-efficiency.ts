@@ -38,6 +38,7 @@ interface EficienciaPorVeiculoRow {
 	totalGastoRecarga: ValorNumerico;
 	totalGastoManutencao: ValorNumerico;
 	totalGastoLavagem: ValorNumerico;
+	totalGastoPedagios: ValorNumerico;
 	totalRecargas: ValorInteiro;
 	recargasGratuitas: ValorInteiro;
 	cpkReal: ValorNumerico;
@@ -119,6 +120,7 @@ function mapVeiculo(row: EficienciaPorVeiculoRow): EficienciaEnergeticaPorVeicul
 		totalGastoRecarga: toNumber(row.totalGastoRecarga),
 		totalGastoManutencao: toNumber(row.totalGastoManutencao),
 		totalGastoLavagem: toNumber(row.totalGastoLavagem),
+		totalGastoPedagios: toNumber(row.totalGastoPedagios),
 		cpkReal: toNumber(row.cpkReal),
 		cpkCombustao: CPK_COMBUSTAO,
 		custoCombustaoHipotetico: toNumber(row.custoCombustaoHipotetico),
@@ -242,6 +244,7 @@ export async function getDashboardEficienciaEnergetica(params: {
 				COALESCE(SUM(CASE WHEN fl.categoria = 'RECARGA' THEN fl.valor ELSE 0 END), 0) AS "totalGastoRecarga",
 				COALESCE(SUM(CASE WHEN fl.categoria = 'MANUTENCAO' THEN fl.valor ELSE 0 END), 0) AS "totalGastoManutencao",
 				COALESCE(SUM(CASE WHEN fl.categoria = 'LIMPEZA' THEN fl.valor ELSE 0 END), 0) AS "totalGastoLavagem",
+				COALESCE(SUM(CASE WHEN fl.categoria = 'PEDAGIOS' THEN fl.valor ELSE 0 END), 0) AS "totalGastoPedagios",
 				COUNT(*) FILTER (WHERE fl.categoria = 'RECARGA')::int AS "totalRecargas",
 				COUNT(*) FILTER (WHERE fl.categoria = 'RECARGA' AND fl.valor = 0)::int AS "recargasGratuitas",
 				CASE
@@ -340,8 +343,7 @@ export async function getDashboardExecutivoEmpresa(params: {
 				COALESCE(SUM(CASE WHEN fl.categoria = 'RECARGA' THEN fl.valor ELSE 0 END), 0) AS "custoRealRecargas",
 				COALESCE(SUM(CASE WHEN fl.categoria = 'RECARGA' THEN fl.valor ELSE 0 END), 0) AS "totalGastoRecarga",
 				COALESCE(SUM(CASE WHEN fl.categoria = 'MANUTENCAO' THEN fl.valor ELSE 0 END), 0) AS "totalGastoManutencao",
-				COALESCE(SUM(CASE WHEN fl.categoria = 'LIMPEZA' THEN fl.valor ELSE 0 END), 0) AS "totalGastoLavagem",
-				COUNT(*) FILTER (WHERE fl.categoria = 'RECARGA')::int AS "totalRecargas",
+				COALESCE(SUM(CASE WHEN fl.categoria = 'LIMPEZA' THEN fl.valor ELSE 0 END), 0) AS "totalGastoLavagem",			COALESCE(SUM(CASE WHEN fl.categoria = 'PEDAGIOS' THEN fl.valor ELSE 0 END), 0) AS "totalGastoPedagios",				COUNT(*) FILTER (WHERE fl.categoria = 'RECARGA')::int AS "totalRecargas",
 				COUNT(*) FILTER (WHERE fl.categoria = 'RECARGA' AND fl.valor = 0)::int AS "recargasGratuitas",
 				CASE WHEN COALESCE(SUM(COALESCE(fl."kmRodados", 0)), 0) > 0 THEN COALESCE(SUM(CASE WHEN fl.categoria = 'RECARGA' THEN fl.valor ELSE 0 END), 0) / COALESCE(SUM(COALESCE(fl."kmRodados", 0)), 0) ELSE 0 END AS "cpkReal",
 				COALESCE(SUM(COALESCE(fl."kmRodados", 0)), 0) * ${CPK_COMBUSTAO}::numeric AS "custoCombustaoHipotetico",
