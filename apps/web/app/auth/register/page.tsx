@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Form, Input, Button, Typography, Card, Space, Spin, message } from "antd";
 import { UserOutlined, MailOutlined, LockOutlined } from "@ant-design/icons";
@@ -40,7 +40,7 @@ export default function RegisterPage() {
     };
   }, [router]);
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: { name?: string; email?: string; password?: string }) => {
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
@@ -54,8 +54,9 @@ export default function RegisterPage() {
       message.success("Cadastro realizado com sucesso!");
       router.push("/dashboard");
       router.refresh();
-    } catch (err: any) {
-      message.error(err.message);
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : "Erro ao cadastrar";
+      message.error(messageText);
     } finally {
       setLoading(false);
     }

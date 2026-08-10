@@ -1,15 +1,12 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
-import type { DashboardExecutivoEmpresa, DashboardPeriodFilter } from "common-types";
+import { useMemo, useState } from "react";
+import type { DashboardPeriodFilter } from "common-types";
 import Image from "next/image";
-import useSWR from "swr";
-import { Button, Card, Col, Empty, Row, Select, Spin, Tag, Typography, message } from "antd";
+import { Button, Card, Col, Empty, Row, Select, Spin, Tag, Typography } from "antd";
 import { useRouter } from "next/navigation";
-import { fetchJson, HttpError, UnauthorizedError } from "@/lib/http";
+import { useGetExecutiveDashboardQuery } from "@/features/dashboard/dashboardApi";
 import { useAuthSession } from "@/lib/use-auth-session";
 import AuthenticatedHeader from "@/components/authenticated-header";
-
-const fetcher = <T,>(url: string) => fetchJson<T>(url);
 
 const periodLabels: Record<DashboardPeriodFilter, string> = {
   current_month: "Mês atual",
@@ -32,42 +29,25 @@ function formatCompactMonth(reference: string) {
   return `${month}/${year}`;
 }
 
-function buildExecutiveUrl(period: DashboardPeriodFilter) {
-  const params = new URLSearchParams({ period });
-  return `/api/dashboard/executivo?${params.toString()}`;
-}
-
 export default function DashboardPage() {
   const router = useRouter();
-  const [sessionExpired, setSessionExpired] = useState(false);
   const [period, setPeriod] = useState<DashboardPeriodFilter>("current_month");
   const { isLoading: isSessionLoading } = useAuthSession();
-  const dashboardUrl = useMemo(() => buildExecutiveUrl(period), [period]);
-  const { data, error, isLoading } = useSWR<DashboardExecutivoEmpresa>(dashboardUrl, fetcher, {
-    onError: (error) => {
-      if (error instanceof UnauthorizedError) {
-        setSessionExpired(true);
-      }
-    },
+  const { data, error, isLoading } = useGetExecutiveDashboardQuery(period, {
+    refetchOnMountOrArgChange: true,
   });
 
   const dashboardErrorMessage = useMemo(() => {
-    if (error instanceof HttpError) {
-      if (error.status === 404) {
+    if (error) {
+      if ("status" in error && typeof error.status === "number" && error.status === 404) {
         return "A API do dashboard não foi encontrada. Configure API_BASE_URL no deploy do app web para apontar para o projeto apps/api.";
       }
 
-      return error.message;
+      return "Não foi possível carregar o dashboard executivo.";
     }
 
     return "Não foi possível carregar o dashboard executivo.";
   }, [error]);
-
-  useEffect(() => {
-    if (sessionExpired) {
-      message.warning("Sua sessão expirou. Faça login novamente.");
-    }
-  }, [sessionExpired]);
 
   if (isSessionLoading) {
     return (

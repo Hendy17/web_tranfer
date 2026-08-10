@@ -1,7 +1,6 @@
 "use client";
 
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Form, Input, Button, Typography, Card, Space, Spin, message } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
@@ -44,7 +43,7 @@ export default function LoginPage() {
     };
   }, [router]);
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: { email?: string; password?: string }) => {
     setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
@@ -60,8 +59,9 @@ export default function LoginPage() {
       message.success("Login realizado com sucesso!");
       router.push(redirectTo);
       router.refresh();
-    } catch (err: any) {
-      message.error(err.message);
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : "Erro ao fazer login";
+      message.error(messageText);
     } finally {
       setLoading(false);
     }

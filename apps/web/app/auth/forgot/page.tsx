@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
       });
       const data = await res.json();
       setStatus(data.message || data.error || "Solicitação enviada.");
-    } catch (err: any) {
+    } catch {
       setStatus("Erro ao solicitar recuperação.");
     } finally {
       setLoading(false);
